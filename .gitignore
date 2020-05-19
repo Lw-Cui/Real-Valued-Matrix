@@ -33,3 +33,4 @@
 
 # Temp dir
 build
+.vscode/settings.json
