@@ -5,15 +5,13 @@ using namespace matrix;
 
 CPP20Matrix matrix::operator+(const CPP20Matrix &m1, const CPP20Matrix &m2)
 {
-    return CPP20Matrix{{1}};
-}
-
-template <>
-CPP20Matrix::CPP20Matrix(std::initializer_list<std::initializer_list<float>> nested)
-{
-    for (auto &row : nested)
+    auto tmp(m1);
+    for (int i = 0; i < m2.content.size(); i++)
     {
-        std::vector<float> tmp(std::begin(row), std::end(row));
-        content.push_back(std::move(tmp));
+        for (int j = 0; j < m2.content.front().size(); j++)
+        {
+            tmp[i][j] += m2.content[i][j];
+        }
     }
+    return move(tmp);
 }

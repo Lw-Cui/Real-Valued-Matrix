@@ -6,14 +6,20 @@ using namespace matrix;
 int main()
 {
     cout << "HelloWorld!" << endl;
-    CPP20Matrix matrix{
+
+    CPP20Matrix m1{
         {1, 2},
         {3, 4},
         {5, 6},
     };
 
-    auto m(matrix);
-    cout << m[2][1] << endl;
-    auto m2 = m + CPP20Matrix{{1, 2}, {2, 3}};
+    CPP20Matrix m2(vector<vector<float>>{
+        {3, 4},
+        {5, 6},
+        {1, 2},
+    });
+
+    auto m3 = m1 + m2;
+    cout << m3[1][1] << endl;
     return 0;
 }
