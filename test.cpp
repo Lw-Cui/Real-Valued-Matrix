@@ -1,11 +1,10 @@
-#include <boost/asio.hpp>
 #include <CPP20Matrix.hpp>
+#include <ETMatrix.hpp>
 #include <iostream>
 using namespace std;
 using namespace matrix;
 
-int main()
-{
+int main() {
     cout << "HelloWorld!" << endl;
 
     CPP20Matrix m1{
@@ -21,6 +20,8 @@ int main()
     });
 
     auto m3 = m1 + m2;
-    cout << m3[1][1] << endl;
+    //ETMatrix em1(m1), em2(m2);
+    //auto em3 = em1 + em2;
+    //cout << em3[1][1] << endl;
     return 0;
 }
