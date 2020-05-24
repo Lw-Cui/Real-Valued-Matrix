@@ -7,10 +7,10 @@ namespace matrix {
 template <typename E>
 class Expr {
    public:
-    auto operator[](int idx) {
+    auto operator[](int idx) const {
         return static_cast<const E &>(*this)[idx];
     }
-    size_t size() {
+    size_t size() const {
         return static_cast<const E &>(*this).size();
     }
 };
@@ -70,6 +70,13 @@ class ETMatrix : public Expr<ETMatrix> {
             content.push_back(std::move(vec));
         }
     }
+
+    template <typename E>
+    ETMatrix(const Expr<E> &expr) {
+        for (size_t i = 0; i != expr.size(); ++i) {
+            content.push_back(expr[i]);
+        }
+    }
 };
 
 template <typename E1, typename E2>
@@ -83,7 +90,7 @@ class SumMatrix : public Expr<SumMatrix<E1, E2>> {
     const ETVector operator[](int idx) const {
         auto t1 = e1[idx], t2 = e2[idx];
         std::vector<float> tmp;
-        for (int i = 0; i < t1.size(); i++) {
+        for (size_t i = 0; i < t1.size(); i++) {
             tmp.push_back(t1[i] + t2[i]);
         }
 
@@ -97,7 +104,7 @@ class SumMatrix : public Expr<SumMatrix<E1, E2>> {
 
 template <typename E1, typename E2>
 SumMatrix<E1, E2> operator+(const Expr<E1> &e1, const Expr<E2> &e2) {
-    return SumMatrix<E1, E2>(*static_cast<const E1 *>(&e1), *static_cast<const E2 *>(&e2));
+    return SumMatrix<E1, E2>(static_cast<const E1 &>(e1), static_cast<const E2 &>(e2));
 }
 
 }  // namespace matrix
