@@ -7,11 +7,31 @@ namespace matrix {
 template <typename E>
 class Expr {
    public:
-    decltype(auto) operator[](int idx) {
+    auto operator[](int idx) {
         return static_cast<const E &>(*this)[idx];
     }
     size_t size() {
         return static_cast<const E &>(*this).size();
+    }
+};
+
+class ETVector : public Expr<ETVector> {
+    const std::vector<float> content;
+
+   public:
+    float operator[](int index) const {
+        return content[index];
+    }
+
+    size_t size() const {
+        return content.size();
+    }
+
+    ETVector(std::vector<float> nest) : content(nest) {
+    }
+
+    template <typename T>
+    ETVector(std::initializer_list<T> nest) : content(std::begin(nest), std::end(nest)) {
     }
 };
 
@@ -31,11 +51,11 @@ class SumVector : public Expr<SumVector<E1, E2>> {
     }
 };
 
-class Vector : public Expr<Vector> {
-    const std::vector<float> content;
+class ETMatrix : public Expr<ETMatrix> {
+    std::vector<ETVector> content;
 
    public:
-    float operator[](int index) const {
+    const ETVector &operator[](int index) const {
         return content[index];
     }
 
@@ -43,11 +63,12 @@ class Vector : public Expr<Vector> {
         return content.size();
     }
 
-    Vector(const std::vector<float> &nest) : content(std::begin(nest), std::end(nest)) {
-    }
-
     template <typename T>
-    Vector(std::initializer_list<T> nest) : content(std::begin(nest), std::end(nest)) {
+    ETMatrix(std::initializer_list<std::initializer_list<T>> nested) {
+        for (auto &row : nested) {
+            ETVector vec(row);
+            content.push_back(std::move(vec));
+        }
     }
 };
 
@@ -59,15 +80,14 @@ class SumMatrix : public Expr<SumMatrix<E1, E2>> {
    public:
     SumMatrix(const E1 &_e1, const E2 &_e2) : e1(_e1), e2(_e2) {}
 
-    const Vector operator[](int idx) const {
-        const Vector &t1 = e1[idx];
-        const Vector &t2 = e2[idx];
+    const ETVector operator[](int idx) const {
+        auto t1 = e1[idx], t2 = e2[idx];
         std::vector<float> tmp;
         for (int i = 0; i < t1.size(); i++) {
             tmp.push_back(t1[i] + t2[i]);
         }
 
-        return Vector(tmp);
+        return ETVector(tmp);
     }
 
     size_t size() const {
@@ -75,33 +95,9 @@ class SumMatrix : public Expr<SumMatrix<E1, E2>> {
     }
 };
 
-class ETMatrix : public Expr<ETMatrix> {
-    std::vector<Vector> content;
-
-   public:
-    const Vector &operator[](int index) const {
-        return content[index];
-    }
-
-    size_t size() const {
-        return content.size();
-    }
-
-    template <typename T>
-    ETMatrix(std::initializer_list<std::initializer_list<T>>);
-};
-
 template <typename E1, typename E2>
 SumMatrix<E1, E2> operator+(const Expr<E1> &e1, const Expr<E2> &e2) {
     return SumMatrix<E1, E2>(*static_cast<const E1 *>(&e1), *static_cast<const E2 *>(&e2));
-}
-
-template <typename T>
-ETMatrix::ETMatrix(std::initializer_list<std::initializer_list<T>> nested) {
-    for (auto &row : nested) {
-        Vector vec(row);
-        content.push_back(std::move(vec));
-    }
 }
 
 }  // namespace matrix
