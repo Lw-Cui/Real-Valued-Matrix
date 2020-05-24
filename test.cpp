@@ -19,9 +19,20 @@ int main() {
         {1, 2},
     });
 
-    auto m3 = m1 + m2;
-    //ETMatrix em1(m1), em2(m2);
-    //auto em3 = em1 + em2;
-    //cout << em3[1][1] << endl;
+    ETMatrix em1{
+        {1, 2},
+        {3, 4},
+        {5, 6},
+    };
+
+    ETMatrix em2{
+        {1, 2},
+        {3, 4},
+        {5, 6},
+    };
+
+    auto em3 = em1 + em2 + em1;
+    cout << em3[1][1] << endl;
+
     return 0;
 }
