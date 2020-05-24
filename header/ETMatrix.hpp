@@ -1,6 +1,7 @@
 #ifndef ETMATRIX_HPP
 #define ETMATRIX_HPP
 #include <CPP20Matrix.hpp>
+#include <type_traits>
 
 namespace matrix {
 
@@ -80,7 +81,7 @@ class ETMatrix : public Expr<ETMatrix> {
     template <typename E>
     ETMatrix(const Expr<E> &expr) {
         for (size_t i = 0; i != expr.size(); ++i) {
-            content.push_back(ETVector(expr[i]));
+            content.push_back(expr[i]);
         }
     }
 };
@@ -94,6 +95,7 @@ class SumMatrix : public Expr<SumMatrix<E1, E2>> {
     SumMatrix(const E1 &_e1, const E2 &_e2) : e1(_e1), e2(_e2) {}
 
     auto operator[](int idx) const {
+        // TODO: convert the SumVector into ETVector is necessary
         return ETVector(SumVector<decltype(e1[idx]), decltype(e2[idx])>(e1[idx], e2[idx]));
     }
 
