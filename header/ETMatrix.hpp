@@ -95,7 +95,16 @@ class SumMatrix : public Expr<SumMatrix<E1, E2>> {
     SumMatrix(const E1 &_e1, const E2 &_e2) : e1(_e1), e2(_e2) {}
 
     auto operator[](int idx) const {
-        // TODO: convert the SumVector into ETVector is necessary
+        /*
+         *  Convert the SumVector into ETVector is a must.
+         *
+         *  The conversion eliminates expression tree; just a simple ETVector is returned.
+         *  If not, the SumVector may become a complex tree structure due to recursive call.
+         *  In this case, the whole tree should be evaluated because we need a single ETVector.
+         *  However, this causes exception: Compile time polymorphism fails due to unknown reason.
+         *  The workaround is convert to ETVector each time, keep the returned value simple.
+         *
+         */
         return ETVector(SumVector<decltype(e1[idx]), decltype(e2[idx])>(e1[idx], e2[idx]));
     }
 
