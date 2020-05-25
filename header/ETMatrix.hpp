@@ -28,7 +28,7 @@ class ETVector : public Expr<ETVector> {
         return content.size();
     }
 
-    ETVector(std::vector<float> nest) : content(nest) {
+    ETVector(std::vector<float> nest) : content(std::move(nest)) {
     }
 
     template <typename T>
@@ -45,8 +45,8 @@ class ETVector : public Expr<ETVector> {
 
 template <typename E1, typename E2>
 class SumVector : public Expr<SumVector<E1, E2>> {
-    const E1 &e1;
-    const E2 &e2;
+    const E1 e1;
+    const E2 e2;
 
    public:
     SumVector(const E1 &_e1, const E2 &_e2) : e1(_e1), e2(_e2) {}
@@ -74,14 +74,14 @@ class ETMatrix : public Expr<ETMatrix> {
     template <typename T>
     ETMatrix(std::initializer_list<std::initializer_list<T>> nested) {
         for (auto &row : nested) {
-            content.push_back(ETVector(row));
+            content.emplace_back(row);
         }
     }
 
     template <typename E>
     ETMatrix(const Expr<E> &expr) {
         for (size_t i = 0; i != expr.size(); ++i) {
-            content.push_back(expr[i]);
+            content.emplace_back(expr[i]);
         }
     }
 };
@@ -95,17 +95,9 @@ class SumMatrix : public Expr<SumMatrix<E1, E2>> {
     SumMatrix(const E1 &_e1, const E2 &_e2) : e1(_e1), e2(_e2) {}
 
     auto operator[](int idx) const {
-        /*
-         *  Convert the SumVector into ETVector is a must.
-         *
-         *  The conversion eliminates expression tree; just a simple ETVector is returned.
-         *  If not, the SumVector may become a complex tree structure due to recursive call.
-         *  In this case, the whole tree should be evaluated because we need a single ETVector.
-         *  However, this causes exception: Compile time polymorphism fails due to unknown reason.
-         *  The workaround is convert to ETVector each time, keep the returned value simple.
-         *
-         */
-        return ETVector(SumVector<decltype(e1[idx]), decltype(e2[idx])>(e1[idx], e2[idx]));
+        auto v1 = e1[idx];
+        auto v2 = e2[idx];
+        return SumVector<decltype(v1), decltype(v2)>(v1, v2);
     }
 
     size_t size() const {
